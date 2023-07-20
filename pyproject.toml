@@ -1,0 +1,99 @@
+[tool.poetry]
+name = "data-hackathons"
+version = "0.1.0"
+description = ""
+authors = ["Gabriele Calvo <gcalvo87@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.103.1"
+requests = "^2.31.0"
+uvicorn = "^0.23.2"
+pandas = "^2.0.3"
+gunicorn = "^21.2.0"
+pydantic-settings = "^2.0.3"
+jinja2 = "^3.1.2"
+aiohttp = "^3.8.5"
+azure-data-tables = "^12.4.4"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.9.1"
+ruff = "^0.0.289"
+mypy = "^1.5.1"
+pytest = "^7.4.2"
+poethepoet = "^0.22.1"
+pytest-random-order = "^1.1.0"
+httpx = "^0.25.0"
+pytest-asyncio = "^0.21.1"
+types-requests = "^2.31.0.2"
+responses = "^0.23.3"
+coverage = "^7.3.1"
+pytest-frozen-uuids = "^0.3.5"
+lxml = "^4.9.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+select = [ # see https://beta.ruff.rs/docs/rules/
+  "A", "E", "F", "UP", "I", "W", "SIM", "RUF", "C901"
+]
+ignore = [
+  "A002", # Argument `id` is shadowing a Python builtin
+  "A003", # Class attribute `...` is shadowing a Python builtin
+  "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
+]
+exclude = [
+    ".venv",
+    "__ignore__",
+]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+python_version = "3.11"
+ignore_missing_imports = true
+disallow_untyped_defs = true
+exclude = "tests|.venv|__ignore__"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "--random-order-seed=424242 --ignore=.venv"
+markers = ["integration: mark a test as a integration test"]
+filterwarnings = [
+    "error",
+]
+
+[tool.poe.tasks]
+[tool.poe.tasks.lint]
+help = "Formats and lints the files"
+sequence = [
+    {shell = "poetry run black ."},
+    {shell = "poetry run ruff . --fix"},
+    {shell = "poetry run mypy ."},
+]
+
+[tool.poe.tasks.unit-test]
+help="Runs unit tests"
+shell = "poetry run pytest ./tests -m \"not integration\""
+
+[tool.poe.tasks.test]
+help = "Runs all tests"
+sequence = [
+    { shell = "docker compose pull" },
+    { shell = "docker compose up -d" },
+    { shell = "poetry run coverage run -m pytest ./tests" },
+    { shell = "docker compose down" },
+    { shell = "poetry run coverage report -m" }
+]
+
+[tool.poe.tasks.all]
+help = "Gets files ready to be committed"
+sequence = ["lint", "test"]

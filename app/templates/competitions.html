@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if competitions %}
+
+  <div class="row row-cols-1 row-cols-md-4 g-4">
+    {% for competition in competitions %}
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{competition.name}}</h5>
+          <p class="card-text">{{competition.description}}</p>
+          <p>
+            {% for tag in competition.tags %}
+              <span class="badge text-bg-secondary">{{tag}}</span>
+            {% endfor %}
+          </p>
+          <a href="/competition/{{competition.id}}" class="btn btn-primary">Details</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+{% else %}
+  <p>No competitions found</p>
+{% endif %}
+
+{% endblock %}

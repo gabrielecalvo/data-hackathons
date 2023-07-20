@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if competition %}
+  <h3>{{competition.name}}</h3>
+  <p>
+    {% for tag in competition.tags %}
+    <span class="badge text-bg-secondary">{{tag}}</span>
+  {% endfor %}
+  </p>
+  <br/>
+
+  <h4>Description</h4>
+  <p>{{competition.description}}</p>
+
+  <h4>Data</h4>
+  <ul>
+    {% for d in competition.data %}
+     <li><a href="{{d.url}}">{{d.description}}</a></li>
+    {% endfor %}
+  </ul>
+
+  <h4>Evaluation</h4>
+  <p>Metric: {{competition.evaluation.metric.value}}</p>
+  <p><a href="{{competition.evaluation.feature_dataset_url}}">Evaluation Feature Dataset</a></p>
+
+  <h4>Leaderboard</h4>
+  {% if leaderboard %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Best Score</th>
+          <th scope="col">Best Submission</th>
+          <th scope="col">No Entries</th>
+        </tr>
+      </thead>
+      <tbody class="table-group-divider">
+      {% for r in leaderboard.rows %}
+        <tr>
+          <th scope="row">{{ r.position }}</th>
+          <td>{{ r.participant_name }}</td>
+          <td>{{ "%.3f" | format(r.best_submission_score) }}</td>
+          <td>{{ r.best_submission_name }}</td>
+          <td>{{ r.n_entries }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No submissions yet</p>
+  {% endif %}
+
+{% else %}
+  <p>Competition not found :(</p>
+{% endif %}
+{% endblock %}
