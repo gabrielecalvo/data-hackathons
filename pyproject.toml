@@ -17,6 +17,7 @@ pydantic-settings = "^2.0.3"
 jinja2 = "^3.1.2"
 aiohttp = "^3.8.5"
 azure-data-tables = "^12.4.4"
+python-multipart = "^0.0.6"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.9.1"

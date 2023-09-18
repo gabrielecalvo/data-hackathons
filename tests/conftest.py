@@ -1,4 +1,5 @@
 import contextlib
+from pathlib import Path
 
 import pytest
 from azure.core.exceptions import HttpResponseError
@@ -15,6 +16,7 @@ from app.security.azure_webapp_header import BasicHeaderSecurity
 from app.settings import Settings
 from app.utils.repositories import Repositories, create_repositories
 
+TEST_DATA_FLD = Path(__file__).parent / "data"
 AZURITE_CONNECTION_STRING = (
     "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;"
     "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;"
@@ -23,6 +25,9 @@ AZURITE_CONNECTION_STRING = (
 ADMIN_ID = "admin.id@"
 SAMPLE_PARTICIPANT_ID = "sample.participant@"
 SAMPLE_UUID = "11111111-1111-1111-1111-111111111111"
+
+with open(TEST_DATA_FLD / "sample_target.csv") as f:
+    SAMPLE_ACTUAL_SER_CSV = f.read()
 
 
 @pytest.fixture

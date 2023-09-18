@@ -6,7 +6,7 @@ import responses
 import app.routes.paths as p
 from app.models.competiton import Competition, CompetitionInbound
 from app.models.submission import Submission
-from tests.conftest import ADMIN_ID, SAMPLE_PARTICIPANT_ID, SAMPLE_UUID, make_header
+from tests.conftest import ADMIN_ID, SAMPLE_ACTUAL_SER_CSV, SAMPLE_PARTICIPANT_ID, SAMPLE_UUID, make_header
 
 
 @pytest.mark.freeze_uuids(values=[SAMPLE_UUID])
@@ -57,7 +57,9 @@ async def test_normally_no_id_collisions(client, sample_competition_dict):
 @responses.activate
 async def test_set_submission_and_get_results(client, sample_competition: Competition):
     responses.add(
-        responses.Response(method="GET", url=sample_competition.evaluation.target_dataset_url, json={"a": 1, "b": 2})
+        responses.Response(
+            method="GET", url=sample_competition.evaluation.target_dataset_url, body=SAMPLE_ACTUAL_SER_CSV
+        )
     )
 
     sample_submission = Submission(
@@ -87,7 +89,9 @@ async def test_set_submission_and_get_results(client, sample_competition: Compet
 @responses.activate
 async def test_raise_on_set_invalid_submission(client, sample_competition: Competition):
     responses.add(
-        responses.Response(method="GET", url=sample_competition.evaluation.target_dataset_url, json={"a": 1, "b": 2})
+        responses.Response(
+            method="GET", url=sample_competition.evaluation.target_dataset_url, body=SAMPLE_ACTUAL_SER_CSV
+        )
     )
 
     sample_submission = Submission(

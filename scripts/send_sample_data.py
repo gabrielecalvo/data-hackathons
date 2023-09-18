@@ -7,7 +7,7 @@ from app.models.submission import Submission
 API_ROOT = "http://localhost:8000"
 admin_id = "sample.admin@example.com"
 participant_id = "some.one@example.com"
-target_json = "https://pastebin.com/raw/GNFqpaTx"
+target_json = "https://pastebin.com/raw/sjDrWfsx"
 competition = Competition(
     name="My Competition",
     description="Very cool competition",

@@ -1,6 +1,7 @@
+from http import HTTPStatus
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 import app.routes.paths as p
 from app.constants import TEMPLATES
@@ -8,9 +9,11 @@ from app.models.competiton import Competition
 from app.models.evaluation import METRIC_LOGIC_MAP
 from app.models.leaderboard import LeaderBoard, LeaderBoardRow
 from app.models.participant import ParticipantId
-from app.routes.api import get_competition, get_submission_results
+from app.models.submission import Submission
+from app.routes.api import get_competition, get_submission_results, set_submission
 from app.routes.common import AppState, get_appstate
 from app.security.protocol import SecurityHandler
+from app.utils.parse_csv import series_from_bytes
 
 website_router = APIRouter(include_in_schema=False)
 
@@ -74,3 +77,28 @@ async def _build_leaderboard(competition: Competition, appstate: AppState) -> Le
         positioned_rows.append(row)
 
     return LeaderBoard(rows=positioned_rows)
+
+
+@website_router.post(p.WEB_COMPETITION_SUBMIT)
+async def competition_submit(
+    competition_id: str,
+    name: Annotated[str, Form()],
+    predictions: Annotated[UploadFile, File()],
+    appstate: Annotated[AppState, Depends(get_appstate)],
+) -> Any:
+    try:
+        pred_ser = series_from_bytes(await predictions.read())
+    except Exception:
+        raise HTTPException(
+            detail="Could not load and parse the data. Check it is formatted according to the submission template",
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+        )
+
+    submission = Submission(
+        name=name,
+        competition_id=competition_id,
+        participant_id=appstate.participant.id,
+        predictions=pred_ser.to_dict(),
+    )
+    await set_submission(appstate=appstate, submission=submission)
+    return await competition_detail(competition_id=competition_id, appstate=appstate)
