@@ -53,7 +53,7 @@ async def set_competition(
 
 @api_router.get(p.API_COMPETITIONS_LIST, tags=["Competition"])
 async def get_competitions(appstate: Annotated[AppState, Depends(get_appstate)]) -> list[Competition]:
-    return await appstate.data_repo.get_competitions()
+    return sorted(await appstate.data_repo.get_competitions(), key=lambda x: x.name)
 
 
 @api_router.get(p.API_COMPETITION_GET, tags=["Competition"])

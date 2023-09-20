@@ -27,6 +27,24 @@ async def test_set_and_get_competitions(client, sample_competition_dict):
     assert Competition.model_validate(r.json()) == expected_competition
 
 
+async def test_list_competition_returns_sorted_by_name(client, sample_competition_dict):
+    competition = CompetitionInbound.model_validate(sample_competition_dict)
+    names = [f"Comp{i}" for i in [5, 2, 1, 4, 3]]
+    for name in names:
+        r = await client.post(
+            p.API_COMPETITION_SET,
+            json=competition.model_copy(update={"name": name}).model_dump(),
+            headers=make_header(ADMIN_ID),
+        )
+        assert r.status_code == HTTPStatus.OK
+
+    r = await client.get(p.API_COMPETITIONS_LIST)
+    assert r.status_code == HTTPStatus.OK
+    content = r.json()
+    assert len(content) == 5
+    assert [i["name"] for i in content] == [f"Comp{i}" for i in [1, 2, 3, 4, 5]]
+
+
 async def test_404_if_nonexistent_competition(client):
     response = await client.get(p.API_COMPETITION_GET.format(competition_id="nope"))
     assert response.status_code == HTTPStatus.NOT_FOUND

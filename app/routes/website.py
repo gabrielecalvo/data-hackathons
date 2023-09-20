@@ -10,7 +10,7 @@ from app.models.evaluation import METRIC_LOGIC_MAP
 from app.models.leaderboard import LeaderBoard, LeaderBoardRow
 from app.models.participant import ParticipantId
 from app.models.submission import Submission
-from app.routes.api import get_competition, get_submission_results, set_submission
+from app.routes.api import get_competition, get_competitions, get_submission_results, set_submission
 from app.routes.common import AppState, get_appstate
 from app.security.protocol import SecurityHandler
 from app.utils.parse_csv import series_from_bytes
@@ -25,9 +25,8 @@ async def home(appstate: Annotated[AppState, Depends(get_appstate)]) -> Any:
 
 @website_router.get(p.WEB_COMPETITIONS_LIST)
 async def competition_list(appstate: Annotated[AppState, Depends(get_appstate)]) -> Any:
-    return TEMPLATES.TemplateResponse(
-        "competitions.html", appstate.base_content | {"competitions": await appstate.data_repo.get_competitions()}
-    )
+    competitions = await get_competitions(appstate=appstate)
+    return TEMPLATES.TemplateResponse("competitions.html", appstate.base_content | {"competitions": competitions})
 
 
 @website_router.get(p.WEB_COMPETITION_GET)
