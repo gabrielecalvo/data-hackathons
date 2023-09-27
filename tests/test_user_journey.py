@@ -101,12 +101,31 @@ async def test_raise_on_submissions_of_invalid_data(client, sample_competition: 
             method="GET", url=sample_competition.evaluation.target_dataset_url, body=SAMPLE_ACTUAL_SER_CSV
         )
     )
-    err_msg = "Could not load and parse the data. Check it is formatted according to the submission template"
+    err_msg = "Could not load and parse the data. Check it is formatted according to the submission template."
 
     response = await client.post(
         p.WEB_COMPETITION_SUBMIT.format(competition_id=sample_competition.id),
         data={"name": "Wrong key d instead of b"},
         files={"predictions": ("wrong.csv", b"this is not a csv")},
+        headers=make_header(SAMPLE_PARTICIPANT_ID),
+    )
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+    assert response.json()["detail"] == err_msg
+
+
+@responses.activate
+async def test_raise_on_submissions_null_data(client, sample_competition: Competition):
+    responses.add(
+        responses.Response(
+            method="GET", url=sample_competition.evaluation.target_dataset_url, body=SAMPLE_ACTUAL_SER_CSV
+        )
+    )
+    err_msg = "Found 1 null values in the submitted data. Please fill the NaN with whichever logic you think is fit."
+
+    response = await client.post(
+        p.WEB_COMPETITION_SUBMIT.format(competition_id=sample_competition.id),
+        data={"name": "Wrong key d instead of b"},
+        files={"predictions": ("withnulls.csv", b"C1,C2\na,\nb,3")},
         headers=make_header(SAMPLE_PARTICIPANT_ID),
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

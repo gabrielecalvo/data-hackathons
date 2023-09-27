@@ -89,7 +89,14 @@ async def competition_submit(
         pred_ser = series_from_bytes(await predictions.read())
     except Exception:
         raise HTTPException(
-            detail="Could not load and parse the data. Check it is formatted according to the submission template",
+            detail="Could not load and parse the data. Check it is formatted according to the submission template.",
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+        )
+
+    if nulls := pred_ser.isna().sum():
+        raise HTTPException(
+            detail=f"Found {nulls} null values in the submitted data. "
+            f"Please fill the NaN with whichever logic you think is fit.",
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
         )
 
