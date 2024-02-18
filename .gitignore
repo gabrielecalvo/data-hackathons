@@ -7,4 +7,6 @@
 .ruff_cache/
 .pytest_cache/
 __ignore__/
+__pycache__/
 .coverage
+.python-version
